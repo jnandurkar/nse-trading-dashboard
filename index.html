@@ -102,41 +102,154 @@
             animation: none;
         }
 
+        .live-dot.warning {
+            background: var(--accent-yellow);
+        }
+
         @keyframes pulse {
             0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
             50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
         }
 
-        .api-config {
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid var(--accent-blue);
-            border-radius: 8px;
-            padding: 20px;
+        .setup-alert {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(0, 255, 136, 0.15));
+            border: 2px solid var(--accent-blue);
+            border-radius: 12px;
+            padding: 30px;
             margin-bottom: 30px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .setup-alert h2 {
+            color: var(--accent-blue);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .setup-alert p {
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .setup-alert ol {
+            margin-left: 20px;
+            line-height: 2;
+            color: var(--text-primary);
+        }
+
+        .setup-alert li {
+            margin-bottom: 10px;
+        }
+
+        .setup-alert strong {
+            color: var(--accent-green);
+        }
+
+        .setup-alert code {
+            background: var(--bg-card);
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: var(--accent-yellow);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .api-config {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .api-config h3 {
+            color: var(--accent-blue);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
         }
 
         .api-config input {
             width: 100%;
             padding: 12px;
-            background: var(--bg-card);
+            background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 6px;
             color: var(--text-primary);
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.9rem;
             margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .api-config input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .api-config button {
-            margin-top: 10px;
             background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
             border: none;
             color: var(--bg-primary);
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 6px;
             cursor: pointer;
             font-family: 'IBM Plex Mono', monospace;
             font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .api-config button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .api-config button.secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .api-config .help-text {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .diagnostic-info {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .diagnostic-info h3 {
+            color: var(--accent-yellow);
+            margin-bottom: 15px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .diagnostic-info pre {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            color: var(--accent-green);
+            font-size: 0.85rem;
         }
 
         .market-summary {
@@ -324,6 +437,15 @@
             color: var(--accent-red);
         }
 
+        .success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent-green);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: var(--accent-green);
+        }
+
         .movers-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -353,6 +475,8 @@
             h1 { font-size: 2rem; }
             .market-summary { grid-template-columns: repeat(2, 1fr); }
             .movers-grid { grid-template-columns: 1fr; }
+            .button-group { flex-direction: column; }
+            .button-group button { width: 100%; }
         }
     </style>
 </head>
@@ -362,30 +486,76 @@
             <h1>NSE Real-Time Dashboard</h1>
             <div class="live-status">
                 <div class="live-dot" id="statusDot"></div>
-                <span id="statusText">Connecting...</span>
+                <span id="statusText">Not Connected</span>
             </div>
         </header>
 
+        <div class="setup-alert" id="setupAlert">
+            <h2>⚠️ Backend Setup Required</h2>
+            <p>Your dashboard is ready, but you need to deploy the backend server first to get real-time NSE data.</p>
+            
+            <p><strong>Quick Setup (15 minutes):</strong></p>
+            <ol>
+                <li>Go to <strong>https://render.com</strong> and sign up (free)</li>
+                <li>Create a new <strong>GitHub repository</strong> called <code>nse-backend</code></li>
+                <li>Upload these 3 files from your download:
+                    <ul>
+                        <li><code>app.py</code></li>
+                        <li><code>requirements.txt</code></li>
+                        <li><code>Procfile</code></li>
+                    </ul>
+                </li>
+                <li>On Render: Click <strong>"New +" → "Web Service"</strong></li>
+                <li>Connect your <code>nse-backend</code> repository</li>
+                <li>Wait 5-10 minutes for deployment</li>
+                <li>Copy your backend URL (looks like: <code>https://nse-backend-xxxx.onrender.com</code>)</li>
+                <li>Paste it in the input box below and click "Save & Connect"</li>
+            </ol>
+            
+            <p><strong>📖 Full instructions:</strong> Check the <code>DEPLOYMENT-GUIDE.md</code> file you downloaded</p>
+        </div>
+
         <div class="api-config">
-            <strong>🔧 Backend API Configuration</strong>
-            <input type="text" id="apiUrl" placeholder="https://nse-backend-pc18.onrender.com" />
-            <button onclick="saveApiUrl()">Save & Connect</button>
-            <p style="margin-top: 10px; font-size: 0.85rem; color: var(--text-secondary);">
-                Enter your deployed backend URL above. See deployment guide for instructions.
-            </p>
+            <h3>🔧 Backend API Configuration</h3>
+            <input 
+                type="text" 
+                id="apiUrl" 
+                placeholder="Enter your backend API URL (e.g., https://nse-backend-xxxx.onrender.com)" 
+            />
+            <div class="button-group">
+                <button onclick="saveApiUrl()">💾 Save & Connect</button>
+                <button class="secondary" onclick="testConnection()">🧪 Test Connection</button>
+                <button class="secondary" onclick="showDiagnostics()">🔍 Show Diagnostics</button>
+            </div>
+            <div class="help-text">
+                <strong>Need help?</strong><br>
+                • Make sure your backend is deployed on Render.com<br>
+                • URL should start with <code>https://</code><br>
+                • Don't include <code>/api/</code> at the end<br>
+                • Example: <code>https://nse-backend-abc123.onrender.com</code>
+            </div>
+        </div>
+
+        <div class="diagnostic-info" id="diagnosticInfo" style="display: none;">
+            <h3>🔍 Diagnostic Information</h3>
+            <pre id="diagnosticOutput">Running diagnostics...</pre>
         </div>
 
         <div class="market-summary" id="marketSummary">
-            <div class="loading">Waiting for API connection...</div>
+            <div class="summary-card">
+                <div class="summary-label">Status</div>
+                <div class="summary-value">Waiting</div>
+                <div class="summary-change" style="color: var(--text-secondary)">Configure backend above</div>
+            </div>
         </div>
 
         <div class="section">
             <div class="section-header">
                 <h2 class="section-title">📊 Market Indices</h2>
-                <button class="refresh-btn" onclick="refreshData()" id="refreshBtn">Refresh Data</button>
+                <button class="refresh-btn" onclick="refreshData()" id="refreshBtn" disabled>Refresh Data</button>
             </div>
             <div id="indicesContainer">
-                <div class="loading">Loading indices...</div>
+                <div class="loading">Waiting for backend connection...</div>
             </div>
         </div>
 
@@ -394,7 +564,7 @@
                 <h2 class="section-title">📈 Top NSE Stocks - Real-Time</h2>
             </div>
             <div id="stockTableContainer">
-                <div class="loading">Loading stocks...</div>
+                <div class="loading">Waiting for backend connection...</div>
             </div>
         </div>
 
@@ -403,7 +573,7 @@
                 <h2 class="section-title">🔥 Market Movers</h2>
             </div>
             <div class="movers-grid" id="moversContainer">
-                <div class="loading">Loading market movers...</div>
+                <div class="loading">Waiting for backend connection...</div>
             </div>
         </div>
 
@@ -415,10 +585,12 @@
     <script>
         let API_URL = localStorage.getItem('nseApiUrl') || '';
         let isLoading = false;
+        let autoRefreshInterval = null;
 
         // Load saved API URL on startup
         if (API_URL) {
             document.getElementById('apiUrl').value = API_URL;
+            document.getElementById('setupAlert').style.display = 'none';
             loadAllData();
         }
 
@@ -427,13 +599,132 @@
             API_URL = input.value.trim().replace(/\/$/, ''); // Remove trailing slash
             
             if (!API_URL) {
-                alert('Please enter a valid API URL');
+                alert('❌ Please enter a valid API URL');
+                return;
+            }
+
+            if (!API_URL.startsWith('http://') && !API_URL.startsWith('https://')) {
+                alert('❌ URL must start with https:// or http://');
                 return;
             }
             
             localStorage.setItem('nseApiUrl', API_URL);
-            alert('API URL saved! Loading data...');
-            loadAllData();
+            document.getElementById('setupAlert').style.display = 'none';
+            
+            showSuccess('✅ API URL saved! Testing connection...');
+            setTimeout(() => {
+                loadAllData();
+            }, 1000);
+        }
+
+        async function testConnection() {
+            if (!API_URL) {
+                alert('❌ Please enter and save an API URL first');
+                return;
+            }
+
+            updateStatus('loading', 'Testing connection...');
+            
+            try {
+                const response = await fetch(`${API_URL}/`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showSuccess(`✅ Connection successful! Backend version: ${data.version || 'unknown'}`);
+                    updateStatus('online', 'Connected');
+                } else {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Connection test failed:', error);
+                showError(`❌ Connection failed: ${error.message}`);
+                updateStatus('offline', 'Connection Failed');
+                showDiagnostics();
+            }
+        }
+
+        async function showDiagnostics() {
+            const diagDiv = document.getElementById('diagnosticInfo');
+            const diagOutput = document.getElementById('diagnosticOutput');
+            
+            diagDiv.style.display = 'block';
+            
+            let output = 'Running diagnostics...\n\n';
+            output += `Current API URL: ${API_URL || 'NOT SET'}\n`;
+            output += `Browser: ${navigator.userAgent}\n`;
+            output += `Time: ${new Date().toLocaleString()}\n\n`;
+            
+            if (!API_URL) {
+                output += '❌ ERROR: No API URL configured\n';
+                output += '  → Please enter your backend URL above\n\n';
+                diagOutput.textContent = output;
+                return;
+            }
+
+            output += 'Testing endpoints:\n\n';
+            diagOutput.textContent = output;
+
+            // Test root endpoint
+            try {
+                output += '1. Testing root endpoint /...\n';
+                diagOutput.textContent = output;
+                
+                const response = await fetch(`${API_URL}/`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    output += `   ✅ SUCCESS: ${JSON.stringify(data, null, 2)}\n\n`;
+                } else {
+                    output += `   ❌ FAILED: Status ${response.status}\n\n`;
+                }
+            } catch (error) {
+                output += `   ❌ ERROR: ${error.message}\n`;
+                output += `   Common causes:\n`;
+                output += `   - Backend not deployed yet\n`;
+                output += `   - Wrong URL\n`;
+                output += `   - CORS not enabled\n`;
+                output += `   - Backend sleeping (Render free tier)\n\n`;
+            }
+
+            // Test API endpoint
+            try {
+                output += '2. Testing API endpoint /api/indices...\n';
+                diagOutput.textContent = output;
+                
+                const response = await fetch(`${API_URL}/api/indices`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    output += `   ✅ SUCCESS: Received ${Object.keys(data).length} indices\n\n`;
+                } else {
+                    output += `   ❌ FAILED: Status ${response.status}\n\n`;
+                }
+            } catch (error) {
+                output += `   ❌ ERROR: ${error.message}\n\n`;
+            }
+
+            output += '\n📋 NEXT STEPS:\n';
+            if (!API_URL.includes('onrender.com') && !API_URL.includes('railway.app') && !API_URL.includes('herokuapp.com')) {
+                output += '  ⚠️  URL doesn\'t look like a deployed backend\n';
+                output += '     Expected: https://your-app.onrender.com\n';
+                output += '     Got: ' + API_URL + '\n\n';
+            }
+            
+            output += '  1. Check backend is deployed on Render/Railway\n';
+            output += '  2. Verify URL is correct (copy from Render dashboard)\n';
+            output += '  3. First request may take 30-60 seconds (free tier wake-up)\n';
+            output += '  4. Check Render logs for errors\n';
+            
+            diagOutput.textContent = output;
         }
 
         async function loadAllData() {
@@ -451,29 +742,60 @@
             updateStatus('loading', 'Fetching data...');
 
             try {
-                const response = await fetch(`${API_URL}/api/all`);
+                // First request may take longer on free tier (wake-up time)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
+                const response = await fetch(`${API_URL}/api/all`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
                 
                 if (!response.ok) {
-                    throw new Error(`API returned ${response.status}`);
+                    throw new Error(`API returned ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
                 
+                if (!data || typeof data !== 'object') {
+                    throw new Error('Invalid data format received');
+                }
+
                 updateMarketSummary(data);
                 updateIndices(data.indices);
                 updateStockTable(data.stocks);
                 updateMovers(data.movers);
                 updateStatus('online', 'Live Data');
                 updateLastUpdate();
+                
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = 'Refresh Data';
+                
+                // Start auto-refresh
+                if (!autoRefreshInterval) {
+                    autoRefreshInterval = setInterval(() => {
+                        if (!isLoading) {
+                            loadAllData();
+                        }
+                    }, 60000);
+                }
 
             } catch (error) {
                 console.error('Error fetching data:', error);
+                
+                let errorMsg = 'Failed to load data. ';
+                if (error.name === 'AbortError') {
+                    errorMsg += 'Request timeout. Backend may be waking up (free tier). Please wait 30 seconds and try again.';
+                } else {
+                    errorMsg += error.message;
+                }
+                
                 updateStatus('offline', 'Connection Failed');
-                showError('Failed to connect to backend API. Please check the URL and try again.');
+                showError(errorMsg);
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = 'Retry';
             } finally {
                 isLoading = false;
-                refreshBtn.disabled = false;
-                refreshBtn.textContent = 'Refresh Data';
             }
         }
 
@@ -482,30 +804,54 @@
             const statusText = document.getElementById('statusText');
             
             dot.className = 'live-dot';
-            if (status === 'offline' || status === 'loading') {
+            if (status === 'offline') {
                 dot.classList.add('offline');
+            } else if (status === 'loading') {
+                dot.classList.add('warning');
             }
             
             statusText.textContent = text;
         }
 
+        function showSuccess(message) {
+            const existing = document.querySelector('.success');
+            if (existing) existing.remove();
+            
+            const div = document.createElement('div');
+            div.className = 'success';
+            div.textContent = message;
+            document.querySelector('.api-config').appendChild(div);
+            
+            setTimeout(() => div.remove(), 5000);
+        }
+
+        function showError(message) {
+            const existing = document.querySelectorAll('.error');
+            existing.forEach(el => el.remove());
+            
+            const div = document.createElement('div');
+            div.className = 'error';
+            div.innerHTML = message;
+            document.querySelector('.api-config').appendChild(div);
+        }
+
         function updateMarketSummary(data) {
-            const nifty = data.indices['NIFTY 50'] || {};
-            const advances = data.movers.gainers?.length || 0;
-            const declines = data.movers.losers?.length || 0;
+            const nifty = data.indices?.['NIFTY 50'] || {};
+            const advances = data.movers?.gainers?.length || 0;
+            const declines = data.movers?.losers?.length || 0;
 
             const html = `
                 <div class="summary-card">
                     <div class="summary-label">Nifty 50</div>
                     <div class="summary-value">${nifty.value?.toFixed(2) || 'N/A'}</div>
-                    <div class="summary-change ${nifty.pChange >= 0 ? 'positive' : 'negative'}">
-                        ${nifty.pChange >= 0 ? '▲' : '▼'} ${Math.abs(nifty.pChange || 0).toFixed(2)}%
+                    <div class="summary-change ${(nifty.pChange || 0) >= 0 ? 'positive' : 'negative'}">
+                        ${(nifty.pChange || 0) >= 0 ? '▲' : '▼'} ${Math.abs(nifty.pChange || 0).toFixed(2)}%
                     </div>
                 </div>
                 <div class="summary-card">
                     <div class="summary-label">Stocks Tracked</div>
                     <div class="summary-value">${data.stocks?.length || 0}</div>
-                    <div class="summary-change" style="color: var(--text-secondary)">Real-Time</div>
+                    <div class="summary-change positive">Real-Time</div>
                 </div>
                 <div class="summary-card">
                     <div class="summary-label">Advances / Declines</div>
@@ -516,7 +862,7 @@
                 </div>
                 <div class="summary-card">
                     <div class="summary-label">Market Status</div>
-                    <div class="summary-value">${data.market_status || 'Unknown'}</div>
+                    <div class="summary-value" style="font-size: 1.3rem;">${(data.market_status || 'Unknown').toUpperCase()}</div>
                     <div class="summary-change positive">Live Updates</div>
                 </div>
             `;
@@ -534,10 +880,10 @@
                 <div class="mover-item">
                     <div>
                         <div class="stock-name">${name}</div>
-                        <div class="stock-symbol">${data.value?.toFixed(2) || 'N/A'}</div>
+                        <div class="stock-symbol">₹${data.value?.toFixed(2) || 'N/A'}</div>
                     </div>
-                    <div class="${data.pChange >= 0 ? 'positive' : 'negative'}" style="font-size: 1.1rem; font-weight: 600;">
-                        ${data.pChange >= 0 ? '▲' : '▼'} ${Math.abs(data.pChange || 0).toFixed(2)}%
+                    <div class="${(data.pChange || 0) >= 0 ? 'positive' : 'negative'}" style="font-size: 1.1rem; font-weight: 600;">
+                        ${(data.pChange || 0) >= 0 ? '▲' : '▼'} ${Math.abs(data.pChange || 0).toFixed(2)}%
                     </div>
                 </div>
             `).join('');
@@ -547,11 +893,11 @@
 
         function updateStockTable(stocks) {
             if (!stocks || stocks.length === 0) {
-                document.getElementById('stockTableContainer').innerHTML = '<div class="error">No stock data available</div>';
+                document.getElementById('stockTableContainer').innerHTML = '<div class="error">No stock data available. This may be normal if market is closed.</div>';
                 return;
             }
 
-            const sortedStocks = [...stocks].sort((a, b) => Math.abs(b.pChange) - Math.abs(a.pChange));
+            const sortedStocks = [...stocks].sort((a, b) => Math.abs(b.pChange || 0) - Math.abs(a.pChange || 0));
 
             const html = `
                 <table class="stock-table">
@@ -567,16 +913,17 @@
                     </thead>
                     <tbody>
                         ${sortedStocks.map(stock => {
-                            const signal = stock.pChange > 2 ? 'BUY' : stock.pChange < -2 ? 'SELL' : 'HOLD';
+                            const pChange = stock.pChange || 0;
+                            const signal = pChange > 2 ? 'BUY' : pChange < -2 ? 'SELL' : 'HOLD';
                             return `
                                 <tr>
                                     <td>
-                                        <div class="stock-name">${stock.name}</div>
+                                        <div class="stock-name">${stock.name || stock.symbol}</div>
                                         <span class="stock-symbol">${stock.symbol}</span>
                                     </td>
                                     <td>₹${stock.price?.toFixed(2) || 'N/A'}</td>
-                                    <td class="${stock.pChange >= 0 ? 'positive' : 'negative'}">
-                                        ${stock.pChange >= 0 ? '▲' : '▼'} ${Math.abs(stock.pChange || 0).toFixed(2)}%
+                                    <td class="${pChange >= 0 ? 'positive' : 'negative'}">
+                                        ${pChange >= 0 ? '▲' : '▼'} ${Math.abs(pChange).toFixed(2)}%
                                     </td>
                                     <td style="color: var(--text-secondary)">
                                         ₹${stock.dayHigh?.toFixed(2) || 'N/A'} / ₹${stock.dayLow?.toFixed(2) || 'N/A'}
@@ -601,7 +948,7 @@
 
         function updateMovers(movers) {
             if (!movers || (!movers.gainers?.length && !movers.losers?.length)) {
-                document.getElementById('moversContainer').innerHTML = '<div class="error">No movers data available</div>';
+                document.getElementById('moversContainer').innerHTML = '<div class="loading">No movers data available. Market may be closed.</div>';
                 return;
             }
 
@@ -631,24 +978,14 @@
 
             document.getElementById('moversContainer').innerHTML = `
                 <div>
-                    <h3 style="color: var(--accent-green); margin-bottom: 15px;">🚀 Top Gainers</h3>
-                    ${gainersHtml}
+                    <h3 style="color: var(--accent-green); margin-bottom: 15px; font-family: 'Orbitron', sans-serif;">🚀 Top Gainers</h3>
+                    ${gainersHtml || '<div class="loading">No gainers data</div>'}
                 </div>
                 <div>
-                    <h3 style="color: var(--accent-red); margin-bottom: 15px;">📉 Top Losers</h3>
-                    ${losersHtml}
+                    <h3 style="color: var(--accent-red); margin-bottom: 15px; font-family: 'Orbitron', sans-serif;">📉 Top Losers</h3>
+                    ${losersHtml || '<div class="loading">No losers data</div>'}
                 </div>
             `;
-        }
-
-        function showError(message) {
-            const containers = ['marketSummary', 'indicesContainer', 'stockTableContainer', 'moversContainer'];
-            containers.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.innerHTML = `<div class="error">${message}</div>`;
-                }
-            });
         }
 
         function updateLastUpdate() {
@@ -658,13 +995,6 @@
         function refreshData() {
             loadAllData();
         }
-
-        // Auto-refresh every 60 seconds
-        setInterval(() => {
-            if (API_URL && !isLoading) {
-                loadAllData();
-            }
-        }, 60000);
     </script>
 </body>
 </html>
